@@ -10,14 +10,24 @@ app.use(express.json());
 app.use(cors());
 
 
-//connection string to mongoose
+/*connection string to mongoose
 mongoose.connect("mongodb://localhost:27017/taskDB")
   .then(() => {
     console.log("MongoDB Connected");
   })
   .catch((error) => {inst
     console.log(error);
-  });
+  });*/
+
+  //Mongoose connection string update to deploy
+  mongoose.connect(process.env.MONGODB_URL)
+    .then(() => {
+        console.log("MongoDB Connected");
+    })
+    .catch((error) => {
+        console.error("MongoDB connection error:", error);
+    });
+
 
 // Routes
 
@@ -52,7 +62,15 @@ app.delete("/tasks/:id", async (req, res) => {
     res.json({ message: "Task deleted" });
 });
 
-// Start server
+/* Start server
 app.listen(3000, () => {
     console.log("Server running at http://localhost:3000");
+});*/
+
+//Updated for deploy
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
+
