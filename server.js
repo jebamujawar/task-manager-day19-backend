@@ -1,76 +1,70 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const Task = require("./models/Task");
 
 const app = express();
-
-// Middleware
 app.use(express.json());
 app.use(cors());
 
+// Use your MongoDB Atlas connection string here
+const MONGO_URI = process.env.MONGODB_URL || "mongodb+srv://task-manager-db:<mypass1234>@task-manager.jej0msa.mongodb.net/?appName=task-manager";
 
-/*connection string to mongoose
-mongoose.connect("mongodb://localhost:27017/taskDB")
-  .then(() => {
-    console.log("MongoDB Connected");
-  })
-  .catch((error) => {inst
-    console.log(error);
-  });*/
+mongoose.connect(MONGO_URI)
+    .then(() => console.log("MongoDB Connected"))
+    .catch(err => console.error("MongoDB connection error:", err));
 
-  //Mongoose connection string update to deploy
-  mongoose.connect(process.env.MONGODB_URL)
-    .then(() => {
-        console.log("MongoDB Connected");
-    })
-    .catch((error) => {
-        console.error("MongoDB connection error:", error);
-    });
+// Task schema and model
+const taskSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    completed: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+});
 
+const Task = mongoose.model("Task", taskSchema);
 
 // Routes
-
-// Get all tasks
+app.get("/", (req, res) => res.send("Task Manager Backend is running!"));
 app.get("/tasks", async (req, res) => {
-    const tasks = await Task.find();
-    res.json(tasks);
+    try {
+        const tasks = await Task.find();
+        res.json(tasks);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
 });
 
-// Add new task
 app.post("/tasks", async (req, res) => {
-    const task = new Task({
-        title: req.body.title
-    });
-    await task.save();
-    res.status(201).json(task);
+    try {
+        const task = new Task(req.body);
+        await task.save();
+        res.status(201).json(task);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
 });
 
-// Update task (toggle complete)
 app.put("/tasks/:id", async (req, res) => {
-    const task = await Task.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true }
-    );
-    res.json(task);
+    try {
+        const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(task);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
 });
 
-// Delete task
 app.delete("/tasks/:id", async (req, res) => {
-    await Task.findByIdAndDelete(req.params.id);
-    res.json({ message: "Task deleted" });
+    try {
+        await Task.findByIdAndDelete(req.params.id);
+        res.json({ msg: "Task deleted" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
 });
 
-/* Start server
-app.listen(3000, () => {
-    console.log("Server running at http://localhost:3000");
-});*/
-
-//Updated for deploy
+// Start server
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
