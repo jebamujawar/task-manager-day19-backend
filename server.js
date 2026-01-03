@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(cors());
 
 // Use your MongoDB Atlas connection string here
-const MONGO_URI = process.env.MONGODB_URL || "mongodb+srv://task-manager-db:<mypass1234>@task-manager.jej0msa.mongodb.net/?appName=task-manager";
+const MONGO_URI = process.env.MONGODB_URL || "mongodb+srv://task-manager-db:<1010Hudanauman>@task-manager.jej0msa.mongodb.net/?appName=task-manager";
 
 mongoose.connect(MONGO_URI)
     .then(() => console.log("MongoDB Connected"))
